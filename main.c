@@ -21,6 +21,11 @@ an 12bit left shift is done on the address which is saved in 16bit format then a
 
 
 At the receiving end, data is captured in a similar manner with this protocol in mind.
+
+
+
+AUTHOR NATOR VERINUMBE
+DATE 15/06/2019
  *   
  */
 
