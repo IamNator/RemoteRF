@@ -21,11 +21,6 @@ an 12bit left shift is done on the address which is saved in 16bit format then a
 
 
 At the receiving end, data is captured in a similar manner with this protocol in mind.
-
-
-
-AUTHOR NATOR VERINUMBE
-DATE 15/06/2019
  *   
  */
 
@@ -47,6 +42,9 @@ void Send(uint16_t AnalogData, int k=1);
 /**********/
 
 
+#define _send_delay 45 //45microseconds
+
+
 
 
 int main(void)
@@ -56,6 +54,7 @@ int main(void)
    DDRD |=0x0F //sets lower nibble of portB as output 
    
     DDRD & = ~((1<<PD0)|(1<<PD1)) //"0b(*00)(11 11)000 set as input pins
+    PORTD | = ((1<<PD0)|(1<<PD1)) //set portd0 and D1 as pulled up input
 
    uint8_t i=6;
    //enum dev={K11=1,K12,RP1=0,RP2,RP3,RP4};
@@ -115,45 +114,62 @@ uint16_t ADC_read(uint8_t chnl){
     uint16_t AD_hi = ADCH;
     uint16_t chnl_16 = chnl;
 
-    uint16_t AnalogData =((ADCL)|(ADCH)|(chnl_16<<12));
-    return AnalogData;
-}
-
-void Send(uint16_t AnalogData, int k=1){
-    DDRD | = ((1<<PD2)|(1<<PD3)|(1<<PD4)|(1<<PD5)) //"0b00(11 11)000 set as output pins
-    char Send_data[16] = AnalogData;
-    uint8_t j=0, i=0, h=0;
-
-    
-    if (k==1)
-    {
-    PORTD.2 = 0; 
-    PORTD.3 = 0;
-    PORTD.4 = 0;
-    PORTD.5 = 0;
-    _delay_ms(8000);
-    }
-    
+    uint16_t AnalogData_ADC_read =((ADCL)|(ADCH)|(chnl_16<<12));
+ 
+    return AnalogData_ADC_read;
+}    
 
 
-    while (i<=4) {
-        uint8_t Send_4bits;
-        char Send_4bits[4];
 
-        for (j=0; j<=3; j++){
-            Send_4bits[j] = Send_data[j+h];
+bool Send(uint16_t AnalogData, int k=1){
+        DDRD | = ((1<<PD2)|(1<<PD3)|(1<<PD4)|(1<<PD5)) //"0b00(11 11)000 set as output pins
+        //char Send_data[]=// string value of AnalogData
+        bool Send_data[16];
+        
+            for(int8_t i=0; i<=15; i++)
+            {
+                if(AnalogData[i] & (1<<i)){
+                    AnalogData[i] = 1;
+                }else if (!(AnalogData[i] & (1<<i)){
+                    AnalogData[i] = 0;
+                }else return 0;
+            }
+
+
+
+
+        uint8_t j=i=h=0;
+
+        
+        if (k==1)
+        {
+        PORTD.2 = 0; 
+        PORTD.3 = 0;
+        PORTD.4 = 0;
+        PORTD.5 = 0;
+        _delay_ms(4*_send_delay);
         }
-         
-         PORTD.2 = Send_4bits[0]; 
-         PORTD.3 = Send_4bits[1];
-         PORTD.4 = Send_4bits[2];
-         PORTD.5 = Send_4bits[3];
+        
 
-    h+=3;
-    i++    
-    _delay_ms(2000);
-    } 
 
-    Send(0x00, 0);
-    _delay_ms(2000);
+        while (i<=3) {
+            uint8_t Send_4bits;
+            bool Send_4bits[4];
+
+            for (j=0; j<=3; j++){
+                Send_4bits[j] = Send_data[j+h];
+            }
+            
+            PORTD.2 = Send_4bits[0]; 
+            PORTD.3 = Send_4bits[1];
+            PORTD.4 = Send_4bits[2];
+            PORTD.5 = Send_4bits[3];
+
+        h+=4;
+        i++    
+        _delay_ms(_send_delay);
+        } 
+
+        Send(0x00, 0);
+        //_delay_ms(2000);
 }
