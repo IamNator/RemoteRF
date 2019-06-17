@@ -84,9 +84,9 @@ int main(void)
             Analog_data = ADC_read(t);
         
 
-        if (PIND & (1<<0)){
+        if ( !(PIND & (1<<0)) ){
             Analog_data = 0b0100000000000011; 
-        }else if (PIND & (1<<1)){
+        }else if (!(PIND & (1<<1))){
             Analog_data = 0b0101000000001111;
         }
          Send(Analog_data);
@@ -162,18 +162,21 @@ void Send(uint16_t AnalogData){
             for (w=2; w<=5; w++){
 
             	if (Send_4bits[w-2]){
-                 Send_8bits |= (1<<w); //(Send_4bits[(w-2)]<<w);     //information carried by B0 to B3
+
+            	   Send_8bits |= (1<<w);
+                  // PORTD = (1<<w);//Send_8bits |= (1<<w); //(Send_4bits[(w-2)]<<w);     //information carried by B0 to B3
             	} else{
-            		Send_8bits &= ~(1<<(w));
+            		Send_8bits &= ~(1<<w);
+            		//PORTD = Send_8bits; //Send_8bits &= ~(1<<w);
             	}
             }
 
             PORTD = Send_8bits;
-            _delay_ms(100);   /*-//Send_4bits; PORTD.2 = Send_4bits[0]; PORTD.3 = Send_4bits[1]; PORTD.4 = Send_4bits[2]; PORTD.5 = Send_4bits*/
+            _delay_ms(1000);   /*-//Send_4bits; PORTD.2 = Send_4bits[0]; PORTD.3 = Send_4bits[1]; PORTD.4 = Send_4bits[2]; PORTD.5 = Send_4bits*/
 
         h+=4;
         k++;    
-        _delay_ms(45);
+        //_delay_ms(45);
         } 
 
         //_delay_ms(2000);
