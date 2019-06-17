@@ -169,7 +169,7 @@ void Send(uint16_t AnalogData){
             }
 
             PORTD = Send_8bits;
-            _delay_ms(1000000);   /*-//Send_4bits; PORTD.2 = Send_4bits[0]; PORTD.3 = Send_4bits[1]; PORTD.4 = Send_4bits[2]; PORTD.5 = Send_4bits*/
+            _delay_ms(100);   /*-//Send_4bits; PORTD.2 = Send_4bits[0]; PORTD.3 = Send_4bits[1]; PORTD.4 = Send_4bits[2]; PORTD.5 = Send_4bits*/
 
         h+=4;
         k++;    
