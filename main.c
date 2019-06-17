@@ -13,7 +13,7 @@
 if all 16 bits low then, then 16 bits complete information has been sent, and the next 16 bits is about to be sent.
 
 
-so first, is device is pressed, the change in state of that switch is what assigns an 4 bit address to it, then the new value is repressented in 12 bits of data.
+so first, if device is pressed, the change in state of that switch is what assigns an 4 bit address to it, then the new value is repressented in 12 bits of data.
 
 an 12bit left shift is done on the address which is saved in 16bit format then a bitwise or operation is done between the address and data bits. this is stored in 16 bit array. A ready_to_send function that send 4 low bits 4 times at a specified time interval x_miliseconds (eg 2 miliseconds) is initiated then another send_function sends the 16bits of information at 4 bits packets at time interval of x_miliseconds(eg 2 miliseconds) apart. 
 
@@ -26,7 +26,7 @@ At the receiving end, data is captured in a similar manner with this protocol in
 
 
 
-#define F_CPU 1000000UL
+#define F_CPU 1000000UL //internal clock used
 
 #include <avr/io.h>
 #include <stdint.h>
@@ -53,10 +53,10 @@ int main(void)
    DDRC=0x00 // Sets portC as inputs or DDRC = 0b00000000;
    DDRD |=0x0F //sets lower nibble of portB as output 
    
-    DDRD & = ~((1<<PD0)|(1<<PD1)) //"0b(*00)(11 11)000 set as input pins
+    DDRD & = ~((1<<PD0)|(1<<PD1)) //"0b00(11 11)0(*00) set as input pins
     PORTD | = ((1<<PD0)|(1<<PD1)) //set portd0 and D1 as pulled up input
 
-   uint8_t i=6;
+   //uint8_t i=6;
    //enum dev={K11=1,K12,RP1=0,RP2,RP3,RP4};
    
    /*
@@ -122,7 +122,7 @@ uint16_t ADC_read(uint8_t chnl){
 
 
 bool Send(uint16_t AnalogData){
-        DDRD | = ((1<<PD2)|(1<<PD3)|(1<<PD4)|(1<<PD5)) //"0b00(11 11)000 set as output pins
+        DDRD | = ((1<<PD2)|(1<<PD3)|(1<<PD4)|(1<<PD5)) //"0b000(1 111)00 set as output pins
         //char Send_data[]=// string value of AnalogData
         uint8_t Send_data[16];
         
@@ -152,8 +152,8 @@ bool Send(uint16_t AnalogData){
                 Send_4bits[i] = Send_data[i+h];
             }
 
-            for (i=1; i<=4; i++){
-                 Send_8bits |= (Send_4bits[(i-1)]<<i);     //information carried by B1 to B3
+            for (i=2; i<=5; i++){
+                 Send_8bits |= (Send_4bits[(i-2)]<<i);     //information carried by B1 to B3
             }
 
             PORTD = Send_8bits;   /*-//Send_4bits; PORTD.2 = Send_4bits[0]; PORTD.3 = Send_4bits[1]; PORTD.4 = Send_4bits[2]; PORTD.5 = Send_4bits*/
