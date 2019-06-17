@@ -34,7 +34,7 @@ At the receiving end, data is captured in a similar manner with this protocol in
 
 /***ADC Functions***/
 void ADC_init();
-uint16_t ADC_read(uint8_t chnl);
+uint16_t ADC_read(uint16_t chnl);
 
 /********/
 
@@ -82,7 +82,7 @@ int main(void)
         for (t=0; t<=3; t++){//A0 to A3
             ADC_init();
             Analog_data = ADC_read(t);
-        }
+        
 
         if (PIND & (1<<0)){
             Analog_data = 0b0100000000000011; 
@@ -90,6 +90,8 @@ int main(void)
             Analog_data = 0b0101000000001111;
         }
          Send(Analog_data);
+     };
+
     };
 
     return 0;
@@ -103,7 +105,7 @@ void ADC_init(){
     ADMUX &= ~((1<<REFS1)|(1<<REFS0)); //AREF, internal Vref turned off 
 };
 
-uint16_t ADC_read(uint8_t chnl){
+uint16_t ADC_read(uint16_t chnl){
     //chnl = (chnl>>4); not needed
     ADMUX |=chnl;
     ADCSRA |=(1<<ADSC);
@@ -114,9 +116,9 @@ uint16_t ADC_read(uint8_t chnl){
 
     //uint16_t AD_low = ADCL;
     //uint16_t AD_hi = ADCH;
-    uint16_t chnl_16 = chnl;
+    //uint16_t chnl_16 = chnl;
 
-    uint16_t AnalogData_ADC_read =((ADCL)|(ADCH)|(chnl_16<<12));
+    uint16_t AnalogData_ADC_read =((ADCL)|(ADCH)|(chnl<<12));
  
     return AnalogData_ADC_read;
 }    
@@ -158,10 +160,16 @@ void Send(uint16_t AnalogData){
             }
 
             for (w=2; w<=5; w++){
-                 Send_8bits |= (Send_4bits[(w-2)]<<w);     //information carried by B1 to B3
+
+            	if (Send_4bits[w-2]){
+                 Send_8bits |= (Send_4bits[(w-2)]<<w);     //information carried by B0 to B3
+            	} else{
+            		Send_8bits &= (1<<(w));
+            	}
             }
 
-            PORTD = Send_8bits;   /*-//Send_4bits; PORTD.2 = Send_4bits[0]; PORTD.3 = Send_4bits[1]; PORTD.4 = Send_4bits[2]; PORTD.5 = Send_4bits*/
+            PORTD = Send_8bits;
+            _delay_ms(1000000);   /*-//Send_4bits; PORTD.2 = Send_4bits[0]; PORTD.3 = Send_4bits[1]; PORTD.4 = Send_4bits[2]; PORTD.5 = Send_4bits*/
 
         h+=4;
         k++;    
