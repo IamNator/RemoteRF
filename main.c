@@ -38,7 +38,7 @@ uint16_t ADC_read(uint8_t chnl);
 /********/
 
 /*****Communication to HT-12E*****/
-void Send(uint16_t AnalogData, int k=1);
+void Send(uint16_t AnalogData);
 /**********/
 
 
