@@ -137,7 +137,8 @@ void Send(uint16_t AnalogData){
                     Send_data[i] = 0;
                 };
             }
-
+ 
+ //Essentially Send_data[] == AnalogData
 
 
 
