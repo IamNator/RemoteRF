@@ -77,7 +77,7 @@ int main(void)
     while(1){
         uint16_t Analog_data;
 
-        for (uint8_t t=0; t<=3; t++){
+        for (uint8_t t=0; t<=3; t++){//A0 to A3
             ADC_init();
             Analog_Data = ADC_read(t);
         }
@@ -121,55 +121,47 @@ uint16_t ADC_read(uint8_t chnl){
 
 
 
-bool Send(uint16_t AnalogData, int k=1){
+bool Send(uint16_t AnalogData){
         DDRD | = ((1<<PD2)|(1<<PD3)|(1<<PD4)|(1<<PD5)) //"0b00(11 11)000 set as output pins
         //char Send_data[]=// string value of AnalogData
-        bool Send_data[16];
+        uint8_t Send_data[16];
         
             for(int8_t i=0; i<=15; i++)
             {
-                if(AnalogData[i] & (1<<i)){
-                    AnalogData[i] = 1;
-                }else if (!(AnalogData[i] & (1<<i)){
-                    AnalogData[i] = 0;
+                if(AnalogData & (1<<i)){
+                    Send_data[i] = 1;
+                }else if (!(AnalogData & (1<<i)){
+                    Send_data[i] = 0;
                 }else return 0;
             }
 
 
 
 
-        uint8_t j=i=h=0;
+        uint8_t k=i=h=0;
 
         
-        if (k==1)
-        {
-        PORTD.2 = 0; 
-        PORTD.3 = 0;
-        PORTD.4 = 0;
-        PORTD.5 = 0;
-        _delay_ms(4*_send_delay);
-        }
-        
 
 
-        while (i<=3) {
+        while (k<=3) {
             uint8_t Send_4bits;
-            bool Send_4bits[4];
+            uint8_t Send_4bits[4];
+            uint8_t Send_8bits=0;
 
-            for (j=0; j<=3; j++){
-                Send_4bits[j] = Send_data[j+h];
+            for (i=0; i<=3; i++){
+                Send_4bits[i] = Send_data[i+h];
             }
-            
-            PORTD.2 = Send_4bits[0]; 
-            PORTD.3 = Send_4bits[1];
-            PORTD.4 = Send_4bits[2];
-            PORTD.5 = Send_4bits[3];
+
+            for (i=1; i<=4; i++){
+                 Send_8bits |= (Send_4bits[(i-1)]<<i);     //information carried by B1 to B3
+            }
+
+            PORTD = Send_8bits;   /*-//Send_4bits; PORTD.2 = Send_4bits[0]; PORTD.3 = Send_4bits[1]; PORTD.4 = Send_4bits[2]; PORTD.5 = Send_4bits*/
 
         h+=4;
-        i++    
+        k++;    
         _delay_ms(_send_delay);
         } 
 
-        Send(0x00, 0);
         //_delay_ms(2000);
 }
