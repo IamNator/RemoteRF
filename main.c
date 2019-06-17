@@ -162,7 +162,7 @@ void Send(uint16_t AnalogData){
             for (w=2; w<=5; w++){
 
             	if (Send_4bits[w-2]){
-                 Send_8bits |= (1<<w) //(Send_4bits[(w-2)]<<w);     //information carried by B0 to B3
+                 Send_8bits |= (1<<w); //(Send_4bits[(w-2)]<<w);     //information carried by B0 to B3
             	} else{
             		Send_8bits &= ~(1<<(w));
             	}
