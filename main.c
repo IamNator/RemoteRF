@@ -82,9 +82,9 @@ int main(void)
             Analog_Data = ADC_read(t);
         }
 
-        if (PIND.0==1){
+        if (PIND & (1<<0)){
             uint16_t Analog_Data = 0b0100000000000011; 
-        }else if (PIND.1==1){
+        }else if (PIND & (1<<1)){
             Analog_Data = 0b0101000000001111;
         }
          Send(Analog_data);
