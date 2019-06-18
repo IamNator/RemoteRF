@@ -25,12 +25,15 @@ At the receiving end, data is captured in a similar manner with this protocol in
  */
 
 
-
+#ifndef
 #define F_CPU 1000000UL //internal clock used
+#endif
+
 
 #include <avr/io.h>
 #include <stdint.h>
 #include <util/delay.h>
+#include <interrupt.h>
 
 /***ADC Functions***/
 void ADC_init();
@@ -50,6 +53,7 @@ void Send(uint16_t AnalogData);
 
 int main(void)
 {
+	sei();
    //uint8_t  _send_delay=45;
    DDRC=0x00; // Sets portC as inputs or DDRC = 0b00000000;
    //DDRD |=0x0F; //sets lower nibble of portB as output 
@@ -82,12 +86,14 @@ int main(void)
         for (t=0; t<=3; t++){//A0 to A3
             ADC_init();
             Analog_data = ADC_read(t);
+           // while (!((ADCSRA)&(1<<ADIF)));
+            _delay_ms(10);
         
 
         if ( !(PIND & (1<<0)) ){
-            Analog_data = 0b0100000000000011; 
+            Analog_data |= (1<<10); 
         }else if (!(PIND & (1<<1))){
-            Analog_data = 0b0101000000001111;
+            Analog_data |=  (1<<11);
         }
          Send(Analog_data);
      };
@@ -114,11 +120,11 @@ uint16_t ADC_read(uint16_t chnl){
 
     ADCSRA|=(1<<ADIF);
 
-    //uint16_t AD_low = ADCL;
-    //uint16_t AD_hi = ADCH;
+    uint16_t AD_low = ADCL;
+    uint16_t AD_hi = ADCH;
     //uint16_t chnl_16 = chnl;
 
-    uint16_t AnalogData_ADC_read =((ADCL)|(ADCH)|(chnl<<12));
+    uint16_t AnalogData_ADC_read =((AD_low)|(AD_hi<<8)|(chnl<<12));
  
     return AnalogData_ADC_read;
 }    
