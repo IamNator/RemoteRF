@@ -43,76 +43,52 @@ bit6:F   ADC 10 bit data
 
 #ifndef F_CPU 1000000UL
 #define F_CPU 1000000UL //internal clock used
-#endif
+#endif /*F_CPU 1000000UL*/
 
 
 #include <avr/io.h>
 #include <stdint.h>
 #include <util/delay.h>
-#include <avr/interrupt.h>
+//#include <avr/interrupt.h>
 
-/***ADC Functions***/
+
 void ADC_init();
-uint16_t ADC_read(uint16_t chnl);
-
-/********/
-
-/*****Communication to HT-12E*****/
+uint16_t ADC_read(uint8_t chnl);
 void Send(uint16_t AnalogData);
-/**********/
-
-
-//#define _send_delay 45 //45microseconds
-
-
 
 
 int main(void)
 {
-	sei();
-   //uint8_t  _send_delay=45;
-   DDRC=0x00; // Sets portC as inputs or DDRC = 0b00000000;
-   //DDRD |=0x0F; //sets lower nibble of portB as output 
-   
+
+    DDRC &= ~((1<<PC0)|(1<<PC1)|(1<<PC2)|(1<<PC3)); //0x00; // Sets portC as inputs or DDRC = 0b0000(*0000); 
     DDRD &= ~((1<<PD0)|(1<<PD1)); //"0b00(11 11)0(*00) set as input pins
     PORTD |= ((1<<PD0)|(1<<PD1)); //set portd0 and D1 as pulled up input
 
-   //uint8_t i=6;
-   //enum dev={K11=1,K12,RP1=0,RP2,RP3,RP4};
-   
-   /*
-   device address (6 bits)
+    
 
-   RP1=0b000000 
-   RP2=0b000100
-   RP2=0b001000
-   RP2=0b001100
-   K11=0b010000
-   K12=0b010100
-   
-  */
-
-
-
-    // Insert code
     while(1){
         uint16_t Analog_data;
 		uint8_t t=0;
 
-        for (t=0; t<=3; t++){//A0 to A3
+        for (t=0; t<=3; t++){//reads    A0 to A3
             ADC_init();
+            Analog_data = 0x0000;
             Analog_data = ADC_read(t);
-           // while (!((ADCSRA)&(1<<ADIF)));
             _delay_ms(10);
         
 
-        if ( !(PIND & (1<<0)) ){
-            Analog_data |= (1<<10); 
-        }else if (!(PIND & (1<<1))){
-            Analog_data |=  (1<<11);
-        }
-         Send(Analog_data);
-     };
+	        if (!(PIND & (1<<0)))
+	        {  //appends switches
+	            Analog_data |= (1<<10); 
+	        }
+	        else if (!(PIND & (1<<1)))
+	        {
+	            Analog_data |=  (1<<11);
+	        }
+
+
+               Send(Analog_data);
+        };
 
     };
 
@@ -121,13 +97,13 @@ int main(void)
 
 
 void ADC_init(){
-    PRR &= ~(1<<PRADC); // clears the Power Reduction ADC register
-    DIDR0=0X00; //clears the Digital Input Data Register 0
+    //PRR &= ~(1<<PRADC); // clears the Power Reduction ADC register
+    DIDR0 |=((1<<ADC0D)|(1<<ADC1D)|(1<<ADC2D)|(1<<ADC3D));  //0X00; //sets the Digital Input Disable Register0
     ADCSRA |= ((1<<ADEN)|(1<<ADIE)|(1<<ADPS2)|(1<<ADPS1));// 0b10001110 enables ADC,ADCinterrupt & division factor64-125khz 
     ADMUX &= ~((1<<REFS1)|(1<<REFS0)); //AREF, internal Vref turned off 
 };
 
-uint16_t ADC_read(uint16_t chnl){
+uint16_t ADC_read(uint8_t chnl){
     //chnl = (chnl>>4); not needed
     ADMUX |=chnl;
     ADCSRA |=(1<<ADSC);
@@ -138,9 +114,9 @@ uint16_t ADC_read(uint16_t chnl){
 
     uint16_t AD_low = ADCL;
     uint16_t AD_hi = ADCH;
-    //uint16_t chnl_16 = chnl;
+    uint16_t chnl_16 = chnl;
 
-    uint16_t AnalogData_ADC_read =((AD_low)|(AD_hi<<8)|(chnl<<12));
+    uint16_t AnalogData_ADC_read =((AD_low)|(AD_hi<<8)|(chnl_16<<12));
  
     return AnalogData_ADC_read;
 }    
