@@ -49,7 +49,7 @@ bit6:F   ADC 10 bit data
 #include <avr/io.h>
 #include <stdint.h>
 #include <util/delay.h>
-#include <interrupt.h>
+#include <avr/interrupt.h>
 
 /***ADC Functions***/
 void ADC_init();
