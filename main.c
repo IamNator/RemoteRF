@@ -21,6 +21,22 @@ an 12bit left shift is done on the address which is saved in 16bit format then a
 
 
 At the receiving end, data is captured in a similar manner with this protocol in mind.
+
+
+
+
+bits of AnalogData     (0,1,2,3)            (4,5)              (6,7,8,9,A,B,C,D,   E,F)
+                      Address bits         Switches                 ADCL          ADCH
+bit4:5  01 switch one
+        10 switch two
+
+bit0:3  0001  A0  address
+        0010  A1  address
+        0011  A2  address
+       0100   A3  address
+
+bit6:F   ADC 10 bit data
+
  *   
  */
 
