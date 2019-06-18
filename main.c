@@ -41,7 +41,7 @@ bit6:F   ADC 10 bit data
  */
 
 
-#ifndef
+#ifndef F_CPU 1000000UL
 #define F_CPU 1000000UL //internal clock used
 #endif
 
