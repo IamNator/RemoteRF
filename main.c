@@ -1,4 +1,4 @@
-/*This programme takes analog input from 4 variable resistors, and two switches, set them up into 12 bits of information and appends an address of 4 bits on them. (i.e 16bits), them transmits them throuch a 4 bits encoder operating at a frequency of 3khz. 
+/*This programme takes analog input from 4 variable resistors (POTs), and two switches, set them up into 10 bits of information and appends an address of 4 bits on the analog values and two bits out the 16 bits are reserved for the switches (i.e 16bits), then transmits them through a 4 bits encoder operating at a frequency of 3khz. 
  *
  *
  * The HT-12E appends an 8 bit address to each 4 bit of information sending out 12bits through the 433mhz fm radio transmitter, at the recieving end, the address is cut off and the 4 bit data is put out on a 4 bit output port.
@@ -6,8 +6,8 @@
  *
  *
  *
- * THIS PROGRAM WORKS AT THE RECEIVING END 
- *each variable resistor and switch making up 6 devices gets a unique 4 bit address and the information is 12 bits in length.
+ * THIS PROGRAM WORKS AT THE TRANSMITTING END 
+ *each variable resistor and switch making up 6 devices, the four POTs gets a unique 4 bit address and the information is 10 bits in length,  and two out of 16 bits at all times are reserved for the switch state.
 
  START CONDITION
 if all 16 bits low then, then 16 bits complete information has been sent, and the next 16 bits is about to be sent.
@@ -15,11 +15,15 @@ if all 16 bits low then, then 16 bits complete information has been sent, and th
 
 so first, if device is pressed, the change in state of that switch is what assigns an 4 bit address to it, then the new value is repressented in 12 bits of data.
 
-an 12bit left shift is done on the address which is saved in 16bit format then a bitwise or operation is done between the address and data bits. this is stored in 16 bit array. A ready_to_send function that send 4 low bits 4 times at a specified time interval x_miliseconds (eg 2 miliseconds) is initiated then another send_function sends the 16bits of information at 4 bits packets at time interval of x_miliseconds(eg 2 miliseconds) apart. 
 
 
 
 
+*********Still in development...
+/************************************************************an 12bit left shift is done on the address which is saved in 16bit format then a bitwise or operation is done between the address and data bits. this is stored in 16 bit array. A ready_to_send function that send 4 low bits 4 times at a specified time interval x_miliseconds (eg 2 miliseconds) is initiated then another send_function sends the 16bits of information at 4 bits packets at time interval of x_miliseconds(eg 2 miliseconds) apart.***************************************/ 
+
+
+/*
 At the receiving end, data is captured in a similar manner with this protocol in mind.
 
 
@@ -60,7 +64,7 @@ void Send(uint16_t AnalogData);
 int main(void)
 {
 
-    DDRC &= ~((1<<PC0)|(1<<PC1)|(1<<PC2)|(1<<PC3)); //0x00; // Sets portC as inputs or DDRC = 0b0000(*0000); 
+    //DDRC &= ~((1<<PC0)|(1<<PC1)|(1<<PC2)|(1<<PC3)); //0x00; // Sets portC as inputs or DDRC = 0b0000(*0000); 
     DDRD &= ~((1<<PD0)|(1<<PD1)); //"0b00(11 11)0(*00) set as input pins
     PORTD |= ((1<<PD0)|(1<<PD1)); //set portd0 and D1 as pulled up input
 
@@ -99,26 +103,28 @@ int main(void)
 void ADC_init(){
     //PRR &= ~(1<<PRADC); // clears the Power Reduction ADC register
     DIDR0 |=((1<<ADC0D)|(1<<ADC1D)|(1<<ADC2D)|(1<<ADC3D));  //0X00; //sets the Digital Input Disable Register0
-    ADCSRA |= ((1<<ADEN)|(1<<ADIE)|(1<<ADPS2)|(1<<ADPS1));// 0b10001110 enables ADC,ADCinterrupt & division factor64-125khz 
+    ADCSRA |= ((1<<ADEN)|(1<<ADPS2)|(1<<ADPS1));// 0b10001110 enables ADC & division factor64-125khz 
     ADMUX &= ~((1<<REFS1)|(1<<REFS0)); //AREF, internal Vref turned off 
+    ADCSRA |=(1<<ADSC);
 };
 
 uint16_t ADC_read(uint8_t chnl){
     //chnl = (chnl>>4); not needed
-    ADMUX |=chnl;
-    ADCSRA |=(1<<ADSC);
+    ADNUX &= 0xF0; //clear channel bits
+    ADMUX |=chnl; // set ADC channel to value of chnl
+    ADCSRA |=(1<<ADSC); // Starts A
 
-    while (!((ADCSRA)&(1<<ADIF)));
+    while (!((ADCSRA)&(1<<ADSC)));
 
-    ADCSRA|=(1<<ADIF);
+    ADCSRA|=(1<<ADSC);
 
-    uint16_t AD_low = ADCL;
-    uint16_t AD_hi = ADCH;
-    uint16_t chnl_16 = chnl;
+    //uint16_t AD_low = ADCL;
+    //uint16_t AD_hi = ADCH;
+    //uint16_t chnl_16 = chnl;
 
-    uint16_t AnalogData_ADC_read =((AD_low)|(AD_hi<<8)|(chnl_16<<12));
+    //uint16_t AnalogData_ADC_read =((AD_low)|(AD_hi<<8)|(chnl_16<<12));
  
-    return AnalogData_ADC_read;
+    return ADC; //AnalogData_ADC_read;
 }    
 
 
