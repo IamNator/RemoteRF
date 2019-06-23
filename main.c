@@ -110,7 +110,7 @@ void ADC_init(){
 
 uint16_t ADC_read(uint8_t chnl){
     //chnl = (chnl>>4); not needed
-    ADNUX &= 0xF0; //clear channel bits
+    ADMUX &= 0xF0; //clear channel bits
     ADMUX |=chnl; // set ADC channel to value of chnl
     ADCSRA |=(1<<ADSC); // Starts A
 
