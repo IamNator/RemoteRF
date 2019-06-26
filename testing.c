@@ -27,6 +27,9 @@ bit0:3  0001  A0  address
        0100   A3  address
 bit6:F   ADC 10 bit data
  *   
+ 
+ BY NATOR VERINUMBE
+ 25th/JUNE/2019
  */
 
 
